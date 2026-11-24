@@ -1,0 +1,43 @@
+```mermaid
+%% Architecture of the Databricks RAG pipeline (source of truth for the SVG).
+%% Solid nodes = original Databricks implementation. Dashed nodes = local substitutes.
+flowchart LR
+    subgraph ING["1 · Ingestion (cells 3–4)"]
+        A["PDF corpus<br/>data/pdfs · /Volumes/…/rag_docs"] --> B["pypdf extraction<br/>page by page, no OCR"]
+        B --> C["clean_text<br/>spaces collapsed, paragraphs kept"]
+        C --> D["RecursiveCharacterTextSplitter<br/>size 1000 · overlap 150 · keep_separator=end"]
+        D --> E["8 chunks<br/>id = file_p{page}_c{i}"]
+    end
+
+    subgraph IDX["2 · Storage &amp; index (cells 4–6)"]
+        F[("Delta table<br/>workspace.default.rag_chunks<br/>CDF enabled")]
+        G["AI Search index<br/>rag_chunks_index<br/>DELTA_SYNC · TRIGGERED"]
+        H["Endpoint rag_endpoint<br/>STANDARD · ONLINE"]
+    end
+
+    subgraph QA["3 · Question answering (cells 7–8)"]
+        Q["Question"] --> R["retrieve(question, k=4)<br/>/query · id, source, page, content"]
+        R --> P["Prompt assembly<br/>SYSTEM_PROMPT + [fichier, page] context"]
+        P --> L["Llama 3.3 70B<br/>/serving-endpoints/…/invocations<br/>temperature 0.1 · max_tokens 800"]
+        L --> S["Answer + sources<br/>(file, page)"]
+    end
+
+    E --> F
+    F --> G
+    G --> H
+    G -.->|top-k passages| R
+    G --> R
+
+    subgraph LOCAL["Local substitutes (not in the PDF)"]
+        J["JsonlChunkStore<br/>data/chunks.jsonl"]:::local
+        T["TfidfVectorIndex<br/>TF-IDF + cosine"]:::local
+        M["OpenAICompatibleChatModel<br/>Ollama / vLLM (optional)"]:::local
+    end
+
+    E -.-> J
+    J -.-> T
+    T -.-> R
+    M -.-> L
+
+    classDef local stroke-dasharray: 6 5,fill:#fcfcfd,color:#334155;
+```

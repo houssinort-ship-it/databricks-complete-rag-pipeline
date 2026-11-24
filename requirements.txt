@@ -1,0 +1,9 @@
+# Local (non-Databricks) execution
+pypdf>=5.1,<8.0
+langchain-text-splitters>=0.3,<1.0
+pytest>=8.0
+
+# Optional: only needed for the Delta table adapter (stores/delta.py) and for
+# running the pipeline on a local Spark. Databricks clusters already have Spark.
+#   pyspark==4.0.1
+#   delta-spark==4.0.0

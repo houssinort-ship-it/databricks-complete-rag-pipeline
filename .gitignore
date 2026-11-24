@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local artefacts
+data/chunks.jsonl
+data/chunks/
+spark-warehouse/
+*.log
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Windows helpers (downloaded binaries)
+.tools/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

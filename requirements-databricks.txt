@@ -1,0 +1,8 @@
+# Installed inside the Databricks notebook (%pip install -q ...)
+pypdf==7.1.1
+langchain-text-splitters==0.3.9
+databricks-sdk>=0.30
+
+# Already provided by the cluster, listed for reference only:
+#   pyspark
+#   delta-spark
